@@ -18,6 +18,7 @@ import * as style from "ui/styling/style";
 import EXACTLY = utils.layout.EXACTLY;
 import AT_MOST = utils.layout.AT_MOST;
 import UNSPECIFIED = utils.layout.UNSPECIFIED;
+
 import MEASURED_SIZE_MASK = utils.layout.MEASURED_SIZE_MASK;
 import MEASURED_STATE_MASK = utils.layout.MEASURED_STATE_MASK;
 import MEASURED_STATE_TOO_SMALL = utils.layout.MEASURED_STATE_TOO_SMALL;
@@ -26,6 +27,7 @@ const MATCH_PARENT = -1;
 const WRAP_CONTENT = -2;
 
 const FLEX_BASIS_PERCENT_DEFAULT = -1.0;
+
 const View_sUseZeroUnspecifiedMeasureSpec = true; // NOTE: android version < M
 
 // Long ints may not be safe in JavaScript
@@ -42,13 +44,13 @@ class FlexLine {
     _right: number = Number.MAX_VALUE;
     _bottom: number = Number.MAX_VALUE;
 
-    _mainSize: number;
-    _dividerLengthInMainSize;
-    _crossSize: number;
-    _itemCount: number;
-    _totalFlexGrow: number;
-    _totalFlexShrink: number;
-    _maxBaseline: number;
+    _mainSize: number = 0;
+    _dividerLengthInMainSize = 0;
+    _crossSize: number = 0;
+    _itemCount: number = 0;
+    _totalFlexGrow: number = 0;
+    _totalFlexShrink: number = 0;
+    _maxBaseline: number = 0;
 
     _indicesAlignSelfStretch: number[] = [];
 
@@ -106,7 +108,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
         if (this._isOrderChangedFromLastMeasurement) {
             this._reorderedIndices = this._createReorderedIndices();
         }
-        if (this._childrenFrozen === null || this._childrenFrozen.length < this.getChildrenCount()) {
+        if (!this._childrenFrozen || this._childrenFrozen.length < this.getChildrenCount()) {
             this._childrenFrozen = new Array(this.getChildrenCount());
         }
 
@@ -194,7 +196,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
         let orders: Order[] = [];
         for (let i = 0; i < childCount; i++) {
             let child = this.getChildAt(i);
-            let params = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(child);
+            let params = FlexboxLayout.getLayoutParams(child);
             let order = new Order();
             order.index = i;
             orders.push(order);
@@ -215,7 +217,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
             if (view == null) {
                 continue;
             }
-            let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(view);
+            let lp = FlexboxLayout.getLayoutParams(view);
             if (lp.order != this._orderCache[i]) {
                 return true;
             }
@@ -250,7 +252,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
                     continue;
                 }
 
-                let lp: FlexboxLayout.LayoutParams = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(child);
+                let lp: FlexboxLayout.LayoutParams = FlexboxLayout.getLayoutParams(child);
                 if (lp.alignSelf == AlignSelf.STRETCH) {
                     flexLine._indicesAlignSelfStretch.push(i);
                 }
@@ -317,7 +319,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
                 let largestHeightInLine = Number.MIN_VALUE;
                 for (let i = viewIndex; i < viewIndex + flexLine._itemCount; i++) {
                     let child = this._getReorderedChildAt(i);
-                    let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(child);
+                    let lp = FlexboxLayout.getLayoutParams(child);
                     if (this.flexWrap != FlexWrap.WRAP_REVERSE) {
                         let marginTop = flexLine._maxBaseline - FlexboxLayout.getBaseline(child);
                         marginTop = Math.max(marginTop, lp.topMargin);
@@ -364,7 +366,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
                 continue;
             }
 
-            let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(child);
+            let lp = FlexboxLayout.getLayoutParams(child);
             if (lp.alignSelf == AlignSelf.STRETCH) {
                 flexLine._indicesAlignSelfStretch.push(i);
             }
@@ -424,7 +426,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
 
     private _checkSizeConstraints(view: View) {
         let needsMeasure = false;
-        let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(view);
+        let lp = FlexboxLayout.getLayoutParams(view);
         let childWidth = view.getMeasuredWidth();
         let childHeight = view.getMeasuredHeight();
 
@@ -519,7 +521,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
                 childIndex++;
                 continue;
             }
-            let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(child);
+            let lp = FlexboxLayout.getLayoutParams(child);
             if (this._isMainAxisDirectionHorizontal(flexDirection)) {
                 if (!this._childrenFrozen[childIndex]) {
                     let rawCalculatedWidth = child.getMeasuredWidth() + unitSpace * lp.flexGrow;
@@ -594,7 +596,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
         let unitShrink = (flexLine._mainSize - maxMainSize) / flexLine._totalFlexShrink;
         let accumulatedRoundError = 0;
         flexLine._mainSize = paddingAlongMainAxis + flexLine._dividerLengthInMainSize;
-        for (let i = 0; i < flexLine._itemCount; i++) {
+        for (let i = 0; i < flexLine.itemCount; i++) {
             let child = this._getReorderedChildAt(childIndex);
             if (child == null) {
                 continue;
@@ -602,7 +604,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
                 childIndex++;
                 continue;
             }
-            let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(child);
+            let lp = FlexboxLayout.getLayoutParams(child);
             if (this._isMainAxisDirectionHorizontal(flexDirection)) {
                 // The direction of main axis is horizontal
                 if (!this._childrenFrozen[childIndex]) {
@@ -799,7 +801,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
             this._flexLines.forEach(flexLine => {
                 for (let i = 0; i < flexLine.itemCount; i++, viewIndex++) {
                     let view = this._getReorderedChildAt(viewIndex);
-                    let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(view);
+                    let lp = FlexboxLayout.getLayoutParams(view);
                     if (lp.alignSelf != AlignSelf.AUTO && lp.alignSelf != AlignSelf.STRETCH) {
                         continue;
                     }
@@ -839,14 +841,14 @@ export class FlexboxLayout extends FlexboxLayoutBase {
     }
 
     private _stretchViewVertically(view: View, crossSize: number) {
-        let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(view);
+        let lp = FlexboxLayout.getLayoutParams(view);
         let newHeight = crossSize - lp.topMargin - lp.bottomMargin;
         newHeight = Math.max(newHeight, 0);
         view.measure(makeMeasureSpec(view.getMeasuredWidth(), EXACTLY), makeMeasureSpec(newHeight, EXACTLY));
     }
 
     private _stretchViewHorizontally(view: View, crossSize: number) {
-        let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(view);
+        let lp = FlexboxLayout.getLayoutParams(view);
         let newWidth = crossSize - lp.leftMargin - lp.rightMargin;
         newWidth = Math.max(newWidth, 0);
         view.measure(makeMeasureSpec(newWidth, EXACTLY), makeMeasureSpec(view.getMeasuredHeight(), EXACTLY));
@@ -1037,15 +1039,15 @@ export class FlexboxLayout extends FlexboxLayoutBase {
             }
             spaceBetweenItem = Math.max(spaceBetweenItem, 0);
 
-            this._flexLines.forEach(flexLine => {
+            for (let j = 0; j < flexLine.itemCount; j++) {
                 let child = this._getReorderedChildAt(currentViewIndex);
                 if (child == null) {
-                    return;
+                    continue;
                 } else if (FlexboxLayout.isGone(child)) {
                     currentViewIndex++;
-                    return;
+                    continue;
                 }
-                let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(child);
+                let lp = FlexboxLayout.getLayoutParams(child);
                 childLeft += lp.leftMargin;
                 childRight -= lp.rightMargin;
 
@@ -1084,7 +1086,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
                 flexLine._top = Math.min(flexLine._top, bounds.top - lp.topMargin);
                 flexLine._right = Math.max(flexLine._right, bounds.right + lp.rightMargin);
                 flexLine._bottom = Math.max(flexLine._bottom, bounds.bottom + lp.bottomMargin);
-            });
+            }
 
             childTop += flexLine._crossSize;
             childBottom -= flexLine._crossSize;
@@ -1092,7 +1094,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
     }
 
     private _layoutSingleChildHorizontal(view: View, flexLine: FlexLine, flexWrap: FlexWrap, alignItems: AlignItems, left: number, top: number, right: number, bottom: number): void {
-        let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(view);
+        let lp = FlexboxLayout.getLayoutParams(view);
 
         if (lp.alignSelf != AlignSelf.AUTO) {
             alignItems = lp.alignSelf;
@@ -1162,8 +1164,9 @@ export class FlexboxLayout extends FlexboxLayoutBase {
         this._flexLines.forEach(flexLine => {
 
             // Omit divider.
-            
+
             let spaceBetweenItem = 0.0;
+
             switch (this.justifyContent) {
                 case JustifyContent.FLEX_START:
                     childTop = paddingTop;
@@ -1203,7 +1206,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
                     currentViewIndex++;
                     continue;
                 }
-                let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(child);
+                let lp = FlexboxLayout.getLayoutParams(child);
                 childTop += lp.topMargin;
                 childBottom -= lp.bottomMargin;
 
@@ -1249,7 +1252,7 @@ export class FlexboxLayout extends FlexboxLayoutBase {
     }
 
     private _layoutSingleChildVertical(view: View, flexLine: FlexLine, isRtl: boolean, alignItems: AlignItems, left: number, top: number, right: number, bottom: number) {
-        let lp = <FlexboxLayout.LayoutParams>FlexboxLayout.getLayoutParams(view);
+        let lp = FlexboxLayout.getLayoutParams(view);
         if (lp.alignSelf != AlignSelf.AUTO) {
             alignItems = lp.alignSelf;
         }
@@ -1404,12 +1407,11 @@ export namespace FlexboxLayout {
 
     export function getBaseline(child: View): number {
         // TODO: Check if we support baseline for iOS.
-        console.log("baseline " + child + ": " + child.ios.firstBaselineAnchor);
         return 0;
     }
 
     export function isGone(child: View): boolean {
-        return child.visibility === enums.Visibility.visible;
+        return child.visibility !== enums.Visibility.visible;
     }
 
     export function getPaddingStart(child: View): number {

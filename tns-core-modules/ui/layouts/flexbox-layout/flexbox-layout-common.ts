@@ -7,6 +7,11 @@ import * as platform from "platform";
 
 export type Basis = "auto" | number;
 
+const ORDER_DEFAULT = 1;
+const FLEX_GROW_DEFAULT = 0.0;
+const FLEX_SHRINK_DEFAULT = 1.0;
+const FLEX_BASIS_PERCENT_DEFAULT = -1.0;
+
 // on Android we explicitly set propertySettings to None because android will invalidate its layout (skip unnecessary native call).
 var AffectsLayout = platform.device.os === platform.platformNames.android ? PropertyMetadataSettings.None : PropertyMetadataSettings.AffectsLayout;
 
@@ -145,10 +150,10 @@ export abstract class FlexboxLayoutBase extends LayoutBase {
     public static alignContentProperty = new Property("alignContent", "FlexboxLayout", new PropertyMetadata("stretch", AffectsLayout, undefined, validateAlignContent, (args: any) => args.object.setNativeAlignContent(args.newValue)));
 
     // TODO: Validation:
-    public static orderProperty = new Property("order", "FlexboxLayout", new PropertyMetadata(1, PropertyMetadataSettings.None, FlexboxLayoutBase.childHandler<number>((flexbox, element, oldValue, newValue) => flexbox.onOrderPropertyChanged(element, oldValue, newValue))));
-    public static flexGrowProperty = new Property("flexGrow", "FlexboxLayout", new PropertyMetadata(0, PropertyMetadataSettings.None, FlexboxLayoutBase.childHandler<number>((flexbox, element, oldValue, newValue) => flexbox.onFlexGrowPropertyChanged(element, oldValue, newValue))));
-    public static flexShrinkProperty = new Property("flexShrink", "FlexboxLayout", new PropertyMetadata(1, PropertyMetadataSettings.None, FlexboxLayoutBase.childHandler<number>((flexbox, element, oldValue, newValue) => flexbox.onFlexShrinkPropertyChanged(element, oldValue, newValue))));
-    public static alignSelfProperty = new Property("alignSelf", "FlexboxLayout", new PropertyMetadata(-1, PropertyMetadataSettings.None, FlexboxLayoutBase.childHandler<AlignSelf>((flexbox, element, oldValue, newValue) => flexbox.onAlignSelfPropertyChanged(element, oldValue, newValue))));
+    public static orderProperty = new Property("order", "FlexboxLayout", new PropertyMetadata(ORDER_DEFAULT, PropertyMetadataSettings.None, FlexboxLayoutBase.childHandler<number>((flexbox, element, oldValue, newValue) => flexbox.onOrderPropertyChanged(element, oldValue, newValue))));
+    public static flexGrowProperty = new Property("flexGrow", "FlexboxLayout", new PropertyMetadata(FLEX_GROW_DEFAULT, PropertyMetadataSettings.None, FlexboxLayoutBase.childHandler<number>((flexbox, element, oldValue, newValue) => flexbox.onFlexGrowPropertyChanged(element, oldValue, newValue))));
+    public static flexShrinkProperty = new Property("flexShrink", "FlexboxLayout", new PropertyMetadata(FLEX_SHRINK_DEFAULT, PropertyMetadataSettings.None, FlexboxLayoutBase.childHandler<number>((flexbox, element, oldValue, newValue) => flexbox.onFlexShrinkPropertyChanged(element, oldValue, newValue))));
+    public static alignSelfProperty = new Property("alignSelf", "FlexboxLayout", new PropertyMetadata(AlignSelf.AUTO, PropertyMetadataSettings.None, FlexboxLayoutBase.childHandler<AlignSelf>((flexbox, element, oldValue, newValue) => flexbox.onAlignSelfPropertyChanged(element, oldValue, newValue))));
 
     constructor() {
         super();
