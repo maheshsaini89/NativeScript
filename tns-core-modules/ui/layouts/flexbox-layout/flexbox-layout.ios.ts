@@ -8,6 +8,9 @@ import {
     FlexboxLayoutBase,
     FlexBasisPercent
 } from "./flexbox-layout-common";
+
+export * from "./flexbox-layout-common";
+
 import {CommonLayoutParams, nativeLayoutParamsProperty} from "ui/styling/style";
 import {LayoutBase} from "ui/layouts/layout-base";
 import {View} from "ui/core/view";
@@ -25,8 +28,6 @@ import MEASURED_STATE_TOO_SMALL = utils.layout.MEASURED_STATE_TOO_SMALL;
 
 const MATCH_PARENT = -1;
 const WRAP_CONTENT = -2;
-
-const FLEX_BASIS_PERCENT_DEFAULT = -1.0;
 
 const View_sUseZeroUnspecifiedMeasureSpec = true; // NOTE: android version < M
 
@@ -545,7 +546,6 @@ export class FlexboxLayout extends FlexboxLayoutBase {
                             accumulatedRoundError += 1.0;
                         }
                     }
-
                     child.measure(makeMeasureSpec(newWidth, EXACTLY), makeMeasureSpec(child.getMeasuredHeight(), EXACTLY));
                 }
                 flexLine._mainSize += child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin;
@@ -1391,7 +1391,7 @@ export namespace FlexboxLayout {
             verticalAlignment: lp.verticalAlignment,
 
             alignSelf: FlexboxLayout.getAlignSelf(child),
-            flexBasisPercent: FLEX_BASIS_PERCENT_DEFAULT,
+            flexBasisPercent: FlexBasisPercent.DEFAULT,
             flexGrow: FlexboxLayout.getFlexGrow(child),
             flexShrink: FlexboxLayout.getFlexShrink(child),
             maxHeight: MAX_SIZE,

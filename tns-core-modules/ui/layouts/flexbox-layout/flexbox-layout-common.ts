@@ -70,7 +70,7 @@ let validJustifyContent = {
 
 export type FlexBasisPercent = number;
 export namespace FlexBasisPercent {
-    export const DEFAULT: number = Number.NaN;
+    export const DEFAULT: number = -1;
 }
 
 function validateJustifyContent(value: any): boolean {

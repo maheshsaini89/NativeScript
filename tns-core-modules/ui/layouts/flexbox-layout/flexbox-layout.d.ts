@@ -1,6 +1,8 @@
 declare module "ui/layouts/flexbox-layout" {
 
     import {View} from "ui/core/view";
+    import {LayoutBase} from "ui/layouts/layout-base";
+    import {PropertyMetadata} from "ui/core/proxy";
 
     export type FlexDirection = "row" | "row-reverse" | "column" | "column-reverse";
     export namespace FlexDirection {
@@ -55,7 +57,17 @@ declare module "ui/layouts/flexbox-layout" {
         export const STRETCH: "stretch";
     }
 
-    export class FlexboxLayout {
+    export class FlexboxLayout extends LayoutBase {
+        public static flexDirectionProperty: PropertyMetadata;
+        public static flexWrapProperty: PropertyMetadata;
+        public static justifyContentProperty: PropertyMetadata;
+        public static alignItemsProperty: PropertyMetadata;
+
+        public flexDirection: FlexDirection;
+        public flexWrap: FlexWrap;
+        public justifyContent: JustifyContent;
+        public alignItems: AlignItems;
+
         public static setOrder(view: View, order: number);
         public static getOrder(view: View): number;
 
