@@ -123,7 +123,7 @@ export class ListView extends common.ListView {
         this._realizedTemplates.forEach((value, index, map) => {
             console.log(`\t${index}:`);
             value.forEach((value, index, map) => {
-                console.log(`\t\t${index.hashCode()}: ${value}`);
+                console.log(`\t\t${index}: ${value}`);
             });
         });
         console.log(`Realized Items Size: ${this._realizedItems.size}`);    
@@ -208,6 +208,7 @@ function ensureListViewAdapterClass() {
         }
         
         public getView(index: number, convertView: android.view.View, parent: android.view.ViewGroup): android.view.View {
+            console.log(`getView(${index}, ${convertView}, ${parent})`);
             //this._listView._dumpRealizedTemplates();
             
             if (!this._listView) {
@@ -273,9 +274,11 @@ function ensureListViewAdapterClass() {
                 // Cache the view for recycling
                 let realizedItemsForTemplateKey = this._listView._realizedTemplates.get(template.key);
                 if (!realizedItemsForTemplateKey){
+                    console.log(`realizedItemsForTemplateKey[${template.key}] = new Map<android.view.View, viewModule.View>();`);
                     realizedItemsForTemplateKey = new Map<android.view.View, viewModule.View>();
                     this._listView._realizedTemplates.set(template.key, realizedItemsForTemplateKey);
                 } 
+                console.log(`realizedItemsForTemplateKey[${template.key}].set(${convertView}, ${args.view});`);
                 realizedItemsForTemplateKey.set(convertView, args.view);
                 this._listView._realizedItems.set(convertView, args.view);
             }
