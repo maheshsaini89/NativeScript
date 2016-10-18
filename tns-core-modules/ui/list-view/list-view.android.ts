@@ -225,7 +225,8 @@ function ensureListViewAdapterClass() {
             if (convertView){
                 view = this._listView._realizedTemplates.get(template.key).get(convertView);
                 if (!view){
-                    throw new Error(`There is no entry with key '${convertView}' in the realized views cache for template with key'${template.key}'.`);
+                    this._listView._dumpRealizedTemplates();
+                    throw new Error(`There is no entry for row ${index} with key '${convertView}' in the realized views cache for template with key'${template.key}'.`);
                 }
             }
             else {
